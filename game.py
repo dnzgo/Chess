@@ -33,6 +33,7 @@ def main():
                 column = location[0] // cell_size
                 row    = location[1] // cell_size
                 if selected_cell == (row, column):
+                    print("you unselect the piece")
                     selected_cell = ()                      #if player clicks same cell twice  undo the selection
                     player_clicks = []
                 else:
