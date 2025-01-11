@@ -16,51 +16,47 @@ class GameState:
     
     def make_move(self, move):
         
-        piece_symbol = self.board[move.start_row][move.start_column]    # Get the piece being moved
+        piece_symbol = self.board[move.start_row][move.start_column]        # Get the piece being moved
 
-        if self.current_player != piece_symbol[0]:                      #if current player is not equal piece color then can not be moved
+        if self.current_player != piece_symbol[0]:                          #if current player is not equal piece color then can not be moved
             print("its not your piece")
             return
-        if piece_symbol == "  ":                                        #if there is no piece in selected cell
+        if piece_symbol == "  ":                                            #if there is no piece in selected cell
             print("No piece at the starting square!")
             return
         
-        piece = self.create_piece(piece_symbol)
+        piece = self.create_piece(piece_symbol)                             # creating an instance of the selected piece
 
         print(piece.symbol)
 
-        if piece.is_valid_move(move.start_cell, move.end_cell, self.board):     # Check if the move is valid
-            self.board[move.start_row][move.start_column] = "  "                # Clear old position
-            self.board[move.end_row][move.end_column] = move.piece_moved        # Update new position
-            self.change_player()                                                # Change turn
+        if piece.is_valid_move(move.start_cell, move.end_cell, self.board): # Check if the move is valid
+            self.board[move.start_row][move.start_column] = "  "            # Clear old position
+            self.board[move.end_row][move.end_column] = move.piece_moved    # Update new position
+            self.change_player()                                            # Change turn
         else:
             print("Invalid move!")
 
     def create_piece(self, symbol):
         
-        if symbol[0] == "w":
-            color = "w"
-        else: color = "b"
         piece_type = symbol[1]
-        match piece_type:                           # create an object of the piece based on symbol
+        match piece_type:                                                   # create an object of the piece based on symbol
             case "P":
-                return Pawn(color)
+                return Pawn(symbol[0])
             case "R":
-                return Rook(color)
+                return Rook(symbol[0])
             case "B":
-                return Bishop(color)
+                return Bishop(symbol[0])
             case "N":
-                return Knight(color)
+                return Knight(symbol[0])
             case "Q":
-                return Queen(color,)
+                return Queen(symbol[0])
             case "K":
-                return King(color)
+                return King(symbol[0])
             case _:
                 return None 
 
 
-    def change_player(self):
-        
+    def change_player(self):                                                # checking the current player and change it to other
         if self.current_player == "w":
             self.current_player = "b"
         else: self.current_player = "w"
@@ -76,17 +72,17 @@ class Move:
     columns_to_files  = {v : k for k, v in files_to_columns.items()}
 
     def __init__(self, start_cell, end_cell, board):
-        self.start_cell      = start_cell
-        self.end_cell        = end_cell
+        self.start_cell      = start_cell                                   # first cells location as x,y
+        self.end_cell        = end_cell                                     # second cells location as x,y
         self.start_row       = start_cell[0]
         self.start_column    = start_cell[1]
         self.end_row         = end_cell[0]
         self.end_column      = end_cell[1]
-        self.piece_moved     = board[self.start_row][self.start_column]
-        self.piece_captured  = board[self.end_row][self.end_column]
+        self.piece_moved     = board[self.start_cell[0]][self.start_cell[1]]# the symbol of piece that moved
+        self.piece_captured  = board[self.end_cell[0]][self.end_cell[1]]    # the symbol of piece that captured
 
 
-    def get_chess_notation(self):                   #pieces move notation as 'a2b3'
+    def get_chess_notation(self):                                           # pieces move notation as 'a2b3'
         return self.get_rank_file(self.start_row, self.start_column) + self.get_rank_file(self.end_row, self.end_column)
     
     def get_rank_file(self, row, column):
