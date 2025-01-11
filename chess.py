@@ -80,10 +80,3 @@ class Move:
         self.end_column      = end_cell[1]
         self.piece_moved     = board[self.start_cell[0]][self.start_cell[1]]# the symbol of piece that moved
         self.piece_captured  = board[self.end_cell[0]][self.end_cell[1]]    # the symbol of piece that captured
-
-
-    def get_chess_notation(self):                                           # pieces move notation as 'a2b3'
-        return self.get_rank_file(self.start_row, self.start_column) + self.get_rank_file(self.end_row, self.end_column)
-    
-    def get_rank_file(self, row, column):
-        return self.columns_to_files[column] + self.rows_to_ranks[row]

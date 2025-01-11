@@ -6,7 +6,7 @@ heigth      = 640
 dimension   = 8
 cell_size   = width // dimension
 images      = {}
-board_image = pygame.image.load("images/board.png")
+board_image = pygame.transform.scale(pygame.image.load("images/board.png"), (width, heigth))
 
 def load_images():
     pieces = ["wP", "wB",  "wK", "wN", "wR", "wQ", "bP", "bB",  "bK", "bN", "bR", "bQ"]
@@ -74,7 +74,7 @@ def draw_selected_cell(screen, selected_cell):
     if selected_cell != ():                                 # Check if a cell is selected
         row, column = selected_cell
         rect = pygame.Rect(column * cell_size, row * cell_size, cell_size, cell_size)
-        pygame.draw.rect(screen, (255, 255, 0), rect)       # Yellow border with thickness 3
+        pygame.draw.rect(screen, (255, 255, 255), rect, 3)       # Yellow border with thickness 3
 
 
 
