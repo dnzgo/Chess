@@ -2,7 +2,9 @@ class Piece:
     def __init__(self, color, symbol):
         self.color = color                      # w / b
         self.symbol = symbol                    #  B K N P Q R
-
+        self.valid_moves = []
+    def get_valid_moves(self, start, board):
+        raise
     def is_valid_move(self, start, end, board): # Override in subclasses
         raise
     def is_friendly_piece(self, board, row, column):
@@ -13,25 +15,34 @@ class Piece:
 class Pawn(Piece):
     def __init__(self, color):
         super().__init__(color, 'P')
+        self.valid_moves = []
     
-    def is_valid_move(self, start, end, board):
+    def get_valid_moves(self, start, board):
         start_row, start_column = start
-        end_row, end_column = end
-        
         if self.color == "w":
             step = -1
         else: step = 1
+        # Forward moves
+        if 0 <= start_row + step < 8 and board[start_row + step][start_column] == "  ":             # check if forward first cell is empty
+            self.valid_moves.append((start_row + step, start_column))
+            if (self.color == "w" and start_row == 6) or (self.color == "b" and start_row == 1):    # check if pawn did not move before and can move 2 cell forward
+                if board[start_row + 2* step][start_column] == "  ":
+                    self.valid_moves.append((start_row + 2* step, start_column))
+        # Captures
+        for offset in [-1, 1]:
+            new_column = start_column + offset
+            if 0 <= start_row + step < 8 and 0 <= new_column < 8:
+                if board[start_row + step][new_column] != "  ":                                     # if diagonal cell is not empty
+                    opponent = board[start_row + step][new_column]
+                    if self.color != opponent[0]:                                                   #if diogonal cell is not contains opponent
+                        self.valid_moves.append((start_row + step, new_column))
+        return self.valid_moves
+    
+    def is_valid_move(self, start, end, board):
+        end_row, end_column = end
         
-        if start_column == end_column:                                                              # Moving forward
-            if (end_row - start_row) == step and board[end_row][end_column] == "  ":
-                return True                                                                         # Move forward one square
-            elif (start_row == 6 and self.color == 'w') or (start_row == 1 and self.color == 'b'):
-                if (end_row - start_row) == 2 * step and board[end_row][end_column] == "  ":
-                    return True                                                                     # moving two squares forward for just first move
-        elif abs(start_column - end_column) == 1 and (end_row - start_row) == step:                 # Capturing diagonally
-            if board[end_row][end_column] != "  " and not self.is_friendly_piece(board, end_row, end_column):
-                return True
-
+        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
+            return True
         return False
 
 
@@ -39,83 +50,133 @@ class Pawn(Piece):
 class Rook(Piece):
     def __init__(self, color):
         super().__init__(color, 'R')
+        self.valid_moves = []                                   # empty the list
+
+    def get_valid_moves(self, start, board):
+        start_row, start_column = start
+
+        # Horizontal and vertical moves
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # right left down up
+        for dir_row, dir_column in directions:
+            row, column = start_row, start_column
+            while 0 <= row + dir_row < 8 and 0 <= column + dir_column < 8:
+                row += dir_row
+                column += dir_column
+                if board[row][column] == "  ":
+                    self.valid_moves.append((row, column))
+                else:
+                    if self.color != board[row][column][0]:  # Opponent piece
+                        self.valid_moves.append((row, column))
+                    break
+        return self.valid_moves
+
 
     def is_valid_move(self, start, end, board):
-        start_row, start_column = start
         end_row, end_column = end
-        if self.is_friendly_piece(board, end_row, end_column):
-            return False
-        if start_row == end_row :                       # Horizontal move
-            if start_column < end_column :              # direction of the piece
-                step = 1
-            else: step = -1
-            for column in range(start_column + step, end_column, step):
-                if board[start_row][column] != "  ":    # if there is a piece between end pos and start pos it is an invalid move
-                    return False 
-            return True
-        elif start_column == end_column:                # Vertical move
-            if start_row < end_row:                     # direction of the piece
-                step = 1
-            else: step = -1
-            for row in range(start_row + step, end_row, step):
-                if board[row][start_column] != "  ":    # checking if there is a piece in between positions
-                    return False
+        
+        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
             return True
         return False
 
 class Knight(Piece):
     def __init__(self, color):
         super().__init__(color, 'N')
+        self.valid_moves = []
+    
+    def get_valid_moves(self, start, board):
+        
+        start_row, start_column = start
+        # All possible L-shaped moves
+        moves = [
+            (2, 1), (2, -1), (-2, 1), (-2, -1),
+            (1, 2), (1, -2), (-1, 2), (-1, -2)
+        ]
+        for dir_row, dir_column in moves:
+            row, column = start_row + dir_row, start_column + dir_column
+            if 0 <= row < 8 and 0 <= column < 8:
+                if board[row][column] == "  " or self.color != board[row][column][0]:
+                    self.valid_moves.append((row, column))
+        return self.valid_moves
 
     def is_valid_move(self, start, end, board):
-        start_row, start_column = start
         end_row, end_column = end
-        if self.is_friendly_piece(board, end_row, end_column):
-            return False
-        if (abs(start_row - end_row) == 2 and abs(start_column - end_column) == 1) or \
-           (abs(start_row - end_row) == 1 and abs(start_column - end_column) == 2):     # move L shape either 2 row 1 col or 1row 2 col
+        
+        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
             return True
         return False
     
 class Bishop(Piece):
     def __init__(self, color):
         super().__init__(color, 'B')
+        self.valid_moves = []
+
+    def get_valid_moves(self, start, board):
+        
+        start_row, start_column = start
+
+        # Diagonal moves
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Bottom-right, Bottom-left, Top-right, Top-left
+        for dir_row, dir_column in directions:
+            row, column = start_row, start_column
+            while 0 <= row + dir_row < 8 and 0 <= column + dir_column < 8:
+                row += dir_row
+                column += dir_column
+                if board[row][column] == "  ":
+                    self.valid_moves.append((row, column))
+                else:
+                    if self.color != board[row][column][0]:  # Opponent piece
+                        self.valid_moves.append((row, column))
+                    break
+        return self.valid_moves
     
     def is_valid_move(self, start, end, board):
-        start_row, start_column = start
         end_row, end_column = end
-        if self.is_friendly_piece(board, end_row, end_column):
-            return False
-        if abs(start_row - end_row) == abs(start_column - end_column):
-            row_step = 1 if end_row > start_row else -1
-            col_step = 1 if end_column > start_column else -1
-            row, col = start_row + row_step, start_column + col_step
-            while row != end_row and col != end_column:
-                if board[row][col] != "  ":
-                    return False                        # check if there is a piece between positions
-                row += row_step
-                col += col_step
+        
+        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
             return True
         return False
 
 class Queen(Piece):
     def __init__(self, color):
         super().__init__(color, 'Q')
+        self.valid_moves = []
+
+    def get_valid_moves(self, start, board):
+        # Queen combines Rook and Bishop moves
+        rook_moves = Rook(self.color).get_valid_moves(start, board)
+        bishop_moves = Bishop(self.color).get_valid_moves(start, board)
+        self.valid_moves = rook_moves + bishop_moves
+        return self.valid_moves
     
     def is_valid_move(self, start, end, board):
-        return Rook(self.color).is_valid_move(start, end, board) or \
-               Bishop(self.color).is_valid_move(start, end, board)
+        end_row, end_column = end
+        
+        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
+            return True
+        return False
 
 class King(Piece):
     def __init__(self, color):
         super().__init__(color, 'K')
+        self.valid_moves = []
+
+    def get_valid_moves(self, start, board):
+        start_row, start_column = start
+        # All possible one-step moves
+        moves = [
+            (1, 0), (-1, 0), (0, 1), (0, -1), 
+            (1, 1), (1, -1), (-1, 1), (-1, -1)
+        ]
+        for dir_row, dir_column in moves:
+            row, column = start_row + dir_row, start_column + dir_column
+            if 0 <= row < 8 and 0 <= column < 8:
+                if board[row][column] == "  " or self.color != board[row][column][0]:
+                    self.valid_moves.append((row, column))
+        return self.valid_moves
     
     def is_valid_move(self, start, end, board):
-        start_row, start_column = start
         end_row, end_column = end
-        if self.is_friendly_piece(board, end_row, end_column):
-            return False
-        if abs(start_row - end_row) <= 1 and abs(start_column - end_column) <= 1:
+        
+        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
             return True
         return False
-

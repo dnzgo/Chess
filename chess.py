@@ -55,6 +55,27 @@ class GameState:
             case _:
                 return None 
 
+    def is_in_check(self, color):
+        # checks if the current players king is under attack
+        king_position = None
+        for row in range(8):                # Find the king's position
+            for column in range(8):
+                piece = self.board[row][column]
+                if piece == f"{color}K":    # King of the current player
+                    king_position = (row, column)
+                    break
+            if king_position:
+                break
+        opponent = "w" if color == "b" else "b"
+        for row in range(8):
+            for column in range(8):
+                piece_symbol = self.board[row][column]
+                piece = self.create_piece(piece_symbol[1])
+                if piece.color == opponent:
+                    valid_moves = piece.get_valid_moves((row, column),self.board)
+                    if king_position in valid_moves:
+                        return True         # King is under attack
+        return False
 
     def change_player(self):                                                # checking the current player and change it to other
         if self.current_player == "w":
@@ -63,14 +84,6 @@ class GameState:
 
 
 class Move:
-
-    ranks_to_rows     = {"1" : 7, "2" : 6, "3" : 5, "4" : 4,
-                         "5" : 3, "6" : 2, "7" : 1, "8": 0}
-    rows_to_ranks     = {v : k for k, v in ranks_to_rows.items()}
-    files_to_columns  = {"a" : 0, "b" : 1, "c" : 2, "d" : 3,
-                         "e" : 4, "f" : 5, "g" : 6, "h": 7}
-    columns_to_files  = {v : k for k, v in files_to_columns.items()}
-
     def __init__(self, start_cell, end_cell, board):
         self.start_cell      = start_cell                                   # first cells location as x,y
         self.end_cell        = end_cell                                     # second cells location as x,y
