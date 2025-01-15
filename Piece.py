@@ -1,12 +1,17 @@
 class Piece:
     def __init__(self, color, symbol):
-        self.color = color                      # w / b
-        self.symbol = symbol                    #  B K N P Q R
+        self.color = color                                              # w / b
+        self.symbol = symbol                                            #  B K N P Q R
         self.valid_moves = []
-    def get_valid_moves(self, start, board):
+    def get_valid_moves(self, start, board):                            # Override in subclasses piece move rules
         raise
-    def is_valid_move(self, start, end, board): # Override in subclasses
-        raise
+    def is_valid_move(self, start, end, board):
+        end_row, end_column = end
+        
+        if (end_row, end_column) in self.get_valid_moves(start, board): # if move is in valid moves list
+            return True
+        return False
+        
     def is_friendly_piece(self, board, row, column):
         if board[row][column][0] != self.color:
             return False
@@ -15,7 +20,6 @@ class Piece:
 class Pawn(Piece):
     def __init__(self, color):
         super().__init__(color, 'P')
-        self.valid_moves = []
     
     def get_valid_moves(self, start, board):
         start_row, start_column = start
@@ -37,20 +41,12 @@ class Pawn(Piece):
                     if self.color != opponent[0]:                                                   #if diogonal cell is not contains opponent
                         self.valid_moves.append((start_row + step, new_column))
         return self.valid_moves
-    
-    def is_valid_move(self, start, end, board):
-        end_row, end_column = end
-        
-        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
-            return True
-        return False
 
 
 
 class Rook(Piece):
     def __init__(self, color):
-        super().__init__(color, 'R')
-        self.valid_moves = []                                   # empty the list
+        super().__init__(color, 'R')                               # empty the list
 
     def get_valid_moves(self, start, board):
         start_row, start_column = start
@@ -70,18 +66,9 @@ class Rook(Piece):
                     break
         return self.valid_moves
 
-
-    def is_valid_move(self, start, end, board):
-        end_row, end_column = end
-        
-        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
-            return True
-        return False
-
 class Knight(Piece):
     def __init__(self, color):
         super().__init__(color, 'N')
-        self.valid_moves = []
     
     def get_valid_moves(self, start, board):
         
@@ -97,18 +84,10 @@ class Knight(Piece):
                 if board[row][column] == "  " or self.color != board[row][column][0]:
                     self.valid_moves.append((row, column))
         return self.valid_moves
-
-    def is_valid_move(self, start, end, board):
-        end_row, end_column = end
-        
-        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
-            return True
-        return False
     
 class Bishop(Piece):
     def __init__(self, color):
         super().__init__(color, 'B')
-        self.valid_moves = []
 
     def get_valid_moves(self, start, board):
         
@@ -128,18 +107,10 @@ class Bishop(Piece):
                         self.valid_moves.append((row, column))
                     break
         return self.valid_moves
-    
-    def is_valid_move(self, start, end, board):
-        end_row, end_column = end
-        
-        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
-            return True
-        return False
 
 class Queen(Piece):
     def __init__(self, color):
         super().__init__(color, 'Q')
-        self.valid_moves = []
 
     def get_valid_moves(self, start, board):
         # Queen combines Rook and Bishop moves
@@ -147,18 +118,10 @@ class Queen(Piece):
         bishop_moves = Bishop(self.color).get_valid_moves(start, board)
         self.valid_moves = rook_moves + bishop_moves
         return self.valid_moves
-    
-    def is_valid_move(self, start, end, board):
-        end_row, end_column = end
-        
-        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
-            return True
-        return False
 
 class King(Piece):
     def __init__(self, color):
         super().__init__(color, 'K')
-        self.valid_moves = []
 
     def get_valid_moves(self, start, board):
         start_row, start_column = start
@@ -173,10 +136,3 @@ class King(Piece):
                 if board[row][column] == "  " or self.color != board[row][column][0]:
                     self.valid_moves.append((row, column))
         return self.valid_moves
-    
-    def is_valid_move(self, start, end, board):
-        end_row, end_column = end
-        
-        if (end_row, end_column) in self.get_valid_moves(start, board):                             # if move is in valid moves list
-            return True
-        return False

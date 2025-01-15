@@ -51,10 +51,10 @@ def main():
                 if len(player_clicks) == 1:
                     piece = game_state.create_piece(game_state.board[row][column])
                     if piece and piece.color == game_state.current_player:
-                        piece.get_valid_moves(player_clicks[0],game_state.board)  # Calculate valid moves
-                        moveable_cells = piece.valid_moves               # Store valid moves for highlighting
+                        piece.get_valid_moves(player_clicks[0],game_state.board)     # Calculate valid moves
+                        moveable_cells = piece.valid_moves                           # Store valid moves for highlighting
                     else:
-                        moveable_cells = []  # Clear valid moves if no valid piece is selected
+                        moveable_cells = []                   # Clear valid moves if no valid piece is selected
 
                 elif len(player_clicks) == 2:                 # if the length of list is 2 we can make move
                     move = chess.Move(player_clicks[0], player_clicks[1], game_state.board)
@@ -94,15 +94,7 @@ def draw_selected_cell(screen, selected_cell):
 def highlight_moves(screen, moveable_cells):
     for move in moveable_cells:
         row, column = move  # Unpack the row and column from each move
-        # Draw a green rectangle on the valid cell
+        # Put a green circle on the valid cell
         screen.blit(highlight_img, (column * cell_size, row * cell_size, cell_size, cell_size))
-        '''
-        pygame.draw.rect(
-            screen,
-            (0, 255, 0, 128),  # RGBA color: Green with 50% transparency
-            pygame.Rect(column * cell_size, row * cell_size, cell_size, cell_size)
-        )
-        '''
-        
 
 main()
