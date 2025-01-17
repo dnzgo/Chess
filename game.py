@@ -24,14 +24,19 @@ def main():
     game_state = chess.GameState()
     load_images()
     horse_neigh = pygame.mixer.Sound("sound/horse-neigh.wav")
-    runnig = True
+    running = True
     selected_cell = ()                                      # last click of user (row, col)
     player_clicks = []                                      # players first and last click
     moveable_cells = []
-    while runnig:
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:                   # if user close the screen
-                runnig = False
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()           # getting the location of the click
                 column = location[0] // cell_size
@@ -62,6 +67,10 @@ def main():
                     selected_cell = ()                      # after move clear the selection
                     player_clicks = []                      # after move clear the clicks
                     moveable_cells = []
+
+        # Check for checkmate after the move
+        if game_state.is_checkmate(game_state.current_player):
+            print(f"Game Over! {'White' if game_state.current_player == 'b' else 'Black'} wins!")
         draw_game_state(screen, game_state, selected_cell, moveable_cells)
         pygame.display.flip()                               # update the screen
 
@@ -70,6 +79,12 @@ def draw_game_state(screen, game_state, selected_cell, moveable_cells):
     draw_board(screen)                                      # drawing squares on the board 
     draw_selected_cell(screen, selected_cell)               # Highlight the selected cell
     draw_pieces(screen, game_state.board)                   # add the pieces on the board with current game state
+    display_player(screen, game_state)
+    if game_state.is_in_check(game_state.current_player):
+        display_message(screen, "CHECK!", (60, (heigth -30)/2), (255, 0, 0))            # Show "CHECK!" in red
+    if game_state.is_checkmate(game_state.current_player):
+        display_message(screen, "CHECKMATE!", (width/2, (heigth -30)/2), (255, 0, 0))   # Show "CHECKMATE!" in red
+
     if moveable_cells != []:
         highlight_moves(screen, moveable_cells) 
 
@@ -97,4 +112,14 @@ def highlight_moves(screen, moveable_cells):
         # Put a green circle on the valid cell
         screen.blit(highlight_img, (column * cell_size, row * cell_size, cell_size, cell_size))
 
+def display_message(screen, message, position, color):
+    font = pygame.font.Font(None, 60)  # the font and size
+    text = font.render(message, True, color)  # Render the message
+    screen.blit(text, position)  # Blit it onto the screen
+
+def display_player(screen, game_state):
+    if game_state.current_player == "w":
+        display_message(screen, "W", (10, (heigth-30)/2), (255, 255, 255))
+    else:
+        display_message(screen, "B", (10, (heigth-30)/2), (0, 0, 0))
 main()

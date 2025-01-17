@@ -13,8 +13,12 @@ class GameState:
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
         self.current_player = "w"
+        self.is_game_over = False
     
     def make_move(self, move):
+
+        if self.is_game_over:                                               # after game over no moves allowed
+            return
         
         piece_symbol = self.board[move.start_row][move.start_column]        # Get the piece being moved
 
@@ -32,9 +36,24 @@ class GameState:
         if piece.is_valid_move(move.start_cell, move.end_cell, self.board): # Check if the move is valid
             self.board[move.start_row][move.start_column] = "  "            # Clear old position
             self.board[move.end_row][move.end_column] = move.piece_moved    # Update new position
+
+            if self.is_in_check(piece_symbol[0]):                           # Check if the move leaves the king in check
+                print("Move leaves your king in check! Invalid move.")
+                
+                self.undo_move(move)                                        # Undo the move
+                return
+            
             self.change_player()                                            # Change turn
+            if self.is_checkmate(self.current_player):
+                self.is_game_over = True
+            if self.is_in_check(self.current_player):
+                print(f"{self.current_player} is in check!")
         else:
             print("Invalid move!")
+
+    def undo_move(self, move):
+        self.board[move.start_row][move.start_column] = move.piece_moved
+        self.board[move.end_row][move.end_column] = move.piece_captured
 
     def create_piece(self, symbol):
         
@@ -57,25 +76,57 @@ class GameState:
 
     def is_in_check(self, color):
         # checks if the current players king is under attack
+        # Find the king's position
+        king = color + "K"
         king_position = None
-        for row in range(8):                # Find the king's position
-            for column in range(8):
-                piece = self.board[row][column]
-                if piece == f"{color}K":    # King of the current player
+        for row in range(len(self.board)):
+            for column in range(len(self.board[row])):
+                if self.board[row][column] == king:
                     king_position = (row, column)
                     break
             if king_position:
                 break
+
         opponent = "w" if color == "b" else "b"
+        for row in range(len(self.board)):
+            for column in range(len(self.board[row])):
+                piece_symbol = self.board[row][column]
+                valid_moves = []
+                if piece_symbol[0] == opponent:
+                    piece = self.create_piece(piece_symbol)
+                    valid_moves = piece.get_valid_moves((row, column), self.board)
+                if king_position in valid_moves:
+                    return True                                             # King is under attack
+                    
+        return False
+    
+    def is_checkmate(self, color):
+        """
+        Checks if the player of the given color is in checkmate.
+        """
+        if not self.is_in_check(color):                                     # If the king is not in check it is not checkmate.
+            return False
+
+        # Iterate through all the pieces of the given color
         for row in range(8):
             for column in range(8):
                 piece_symbol = self.board[row][column]
-                piece = self.create_piece(piece_symbol[1])
-                if piece.color == opponent:
-                    valid_moves = piece.get_valid_moves((row, column),self.board)
-                    if king_position in valid_moves:
-                        return True         # King is under attack
-        return False
+                if piece_symbol[0] == color:                                # Check pieces of the given color
+                    piece = self.create_piece(piece_symbol)
+                    valid_moves = piece.get_valid_moves((row, column), self.board)
+                    
+                    # Simulate every move to see if the king can escape check
+                    for move in valid_moves:
+                        temp_board = [row.copy() for row in self.board]     # Create a temporary board
+                        temp_board[move[0]][move[1]] = piece_symbol         # Simulate the move
+                        temp_board[row][column] = "  "                      # Clear the original cell
+
+                        if not self.is_in_check(color):                     # If this move gets the king out of check
+                            return False
+
+        # If no moves can get the king out of check it is checkmate
+        return True
+
 
     def change_player(self):                                                # checking the current player and change it to other
         if self.current_player == "w":
