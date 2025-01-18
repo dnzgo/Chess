@@ -14,14 +14,6 @@ Check and Checkmate detection.
 Move validation for all pieces.
 Graphical board representation.
 
-
-Future Improvements:
-Add timers for each player’s turn.
-Implement multiplayer mode.
-Enhance AI for single-player gameplay.
-Add sound effects for moves and captures.
-
-
 Chess-main/
 ├── game.py           # Main game loop and graphical interface
 ├── chess.py          # Game logic (board state, moves, check/checkmate)
