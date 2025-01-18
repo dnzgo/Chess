@@ -74,7 +74,7 @@ class GameState:
             case _:
                 return None 
 
-    def is_in_check(self, color):
+    def is_in_check(self, color, board):
         # checks if the current players king is under attack
         # Find the king's position
         king = color + "K"

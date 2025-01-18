@@ -113,9 +113,9 @@ def highlight_moves(screen, moveable_cells):
         screen.blit(highlight_img, (column * cell_size, row * cell_size, cell_size, cell_size))
 
 def display_message(screen, message, position, color):
-    font = pygame.font.Font(None, 60)  # the font and size
-    text = font.render(message, True, color)  # Render the message
-    screen.blit(text, position)  # Blit it onto the screen
+    font = pygame.font.Font(None, 60)           # the font and size
+    text = font.render(message, True, color)    # Render the message
+    screen.blit(text, position)                 # Blit it onto the screen
 
 def display_player(screen, game_state):
     if game_state.current_player == "w":
