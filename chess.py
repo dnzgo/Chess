@@ -37,7 +37,7 @@ class GameState:
             self.board[move.start_row][move.start_column] = "  "            # Clear old position
             self.board[move.end_row][move.end_column] = move.piece_moved    # Update new position
 
-            if self.is_in_check(piece_symbol[0]):                           # Check if the move leaves the king in check
+            if self.is_in_check(piece_symbol[0], self.board):                           # Check if the move leaves the king in check
                 print("Move leaves your king in check! Invalid move.")
                 
                 self.undo_move(move)                                        # Undo the move
@@ -46,7 +46,7 @@ class GameState:
             self.change_player()                                            # Change turn
             if self.is_checkmate(self.current_player):
                 self.is_game_over = True
-            if self.is_in_check(self.current_player):
+            if self.is_in_check(self.current_player, self.board):
                 print(f"{self.current_player} is in check!")
         else:
             print("Invalid move!")
@@ -79,22 +79,22 @@ class GameState:
         # Find the king's position
         king = color + "K"
         king_position = None
-        for row in range(len(self.board)):
-            for column in range(len(self.board[row])):
-                if self.board[row][column] == king:
+        for row in range(len(board)):
+            for column in range(len(board[row])):
+                if board[row][column] == king:
                     king_position = (row, column)
                     break
             if king_position:
                 break
 
         opponent = "w" if color == "b" else "b"
-        for row in range(len(self.board)):
-            for column in range(len(self.board[row])):
-                piece_symbol = self.board[row][column]
+        for row in range(len(board)):
+            for column in range(len(board[row])):
+                piece_symbol = board[row][column]
                 valid_moves = []
                 if piece_symbol[0] == opponent:
                     piece = self.create_piece(piece_symbol)
-                    valid_moves = piece.get_valid_moves((row, column), self.board)
+                    valid_moves = piece.get_valid_moves((row, column), board)
                 if king_position in valid_moves:
                     return True                                             # King is under attack
                     
@@ -104,7 +104,7 @@ class GameState:
         """
         Checks if the player of the given color is in checkmate.
         """
-        if not self.is_in_check(color):                                     # If the king is not in check it is not checkmate.
+        if not self.is_in_check(color, self.board):                                     # If the king is not in check it is not checkmate.
             return False
 
         # Iterate through all the pieces of the given color
@@ -121,7 +121,7 @@ class GameState:
                         temp_board[move[0]][move[1]] = piece_symbol         # Simulate the move
                         temp_board[row][column] = "  "                      # Clear the original cell
 
-                        if not self.is_in_check(color):                     # If this move gets the king out of check
+                        if not self.is_in_check(color, temp_board):                     # If this move gets the king out of check
                             return False
 
         # If no moves can get the king out of check it is checkmate

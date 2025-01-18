@@ -80,7 +80,7 @@ def draw_game_state(screen, game_state, selected_cell, moveable_cells):
     draw_selected_cell(screen, selected_cell)               # Highlight the selected cell
     draw_pieces(screen, game_state.board)                   # add the pieces on the board with current game state
     display_player(screen, game_state)
-    if game_state.is_in_check(game_state.current_player):
+    if game_state.is_in_check(game_state.current_player, game_state.board):
         display_message(screen, "CHECK!", (60, (heigth -30)/2), (255, 0, 0))            # Show "CHECK!" in red
     if game_state.is_checkmate(game_state.current_player):
         display_message(screen, "CHECKMATE!", (width/2, (heigth -30)/2), (255, 0, 0))   # Show "CHECKMATE!" in red
